@@ -9,6 +9,7 @@ type Caption = {
   id: string
   content: string | null
   created_datetime_utc: string
+  imageUrl: string | null
 }
 
 function PolaroidCard({
@@ -59,7 +60,13 @@ function PolaroidCard({
         {/* Photo area */}
         <div
           className="relative overflow-hidden"
-          style={{ height: '188px', backgroundColor: '#f5e8d5' }}
+          style={{
+            height: '188px',
+            backgroundColor: '#f5e8d5',
+            backgroundImage: caption.imageUrl ? `url(${caption.imageUrl})` : undefined,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
         >
           {/* Tint overlay — fades out on reveal */}
           <div

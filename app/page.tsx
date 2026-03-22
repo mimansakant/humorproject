@@ -54,13 +54,20 @@ function FairyLights() {
 }
 
 export default async function Home() {
-  const { data: captions, error } = await supabase
+  const { data: raw, error } = await supabase
     .from('captions')
-    .select('id, content, created_datetime_utc')
+    .select('id, content, created_datetime_utc, images(url)')
     .eq('is_public', true)
     .not('content', 'is', null)
     .order('created_datetime_utc', { ascending: false })
     .limit(50)
+
+  const captions = (raw ?? []).map((row) => ({
+    id: row.id,
+    content: row.content,
+    created_datetime_utc: row.created_datetime_utc,
+    imageUrl: (row.images as unknown as { url: string | null } | null)?.url ?? null,
+  }))
 
   return (
     <main
@@ -81,7 +88,7 @@ export default async function Home() {
           Error: {error.message}
         </p>
       ) : (
-        <PolaroidGrid captions={captions ?? []} />
+        <PolaroidGrid captions={captions} />
       )}
     </main>
   )

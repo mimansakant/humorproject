@@ -1,3 +1,42 @@
+create table public.images (
+  id uuid not null default gen_random_uuid (),
+  created_datetime_utc timestamp with time zone not null default now(),
+  modified_datetime_utc timestamp with time zone not null default now(),
+  url character varying null,
+  is_common_use boolean null default false,
+  profile_id uuid null default auth.uid (),
+  additional_context character varying null,
+  is_public boolean null default false,
+  image_description text null,
+  celebrity_recognition text null,
+  embedding public.vector null,
+  created_by_user_id uuid not null default auth.uid (),
+  modified_by_user_id uuid not null default auth.uid (),
+  constraint images_pkey primary key (id),
+  constraint images_created_by_user_id_fkey foreign KEY (created_by_user_id) references profiles (id) on delete set null,
+  constraint images_modified_by_user_id_fkey foreign KEY (modified_by_user_id) references profiles (id) on delete set null,
+  constraint images_profile_id_fkey foreign KEY (profile_id) references profiles (id) on delete set null
+) TABLESPACE pg_default;
+
+create index IF not exists idx_images_is_common_use on public.images using btree (is_common_use) TABLESPACE pg_default
+where
+  (is_common_use = true);
+
+create index IF not exists idx_images_is_public on public.images using btree (is_public) TABLESPACE pg_default
+where
+  (is_public = true);
+
+create index IF not exists idx_images_profile_id on public.images using btree (profile_id) TABLESPACE pg_default;
+
+create trigger set_created_and_modified_by_user_ids_before_write BEFORE INSERT
+or
+update on images for EACH row
+execute FUNCTION set_created_and_modified_by_user_ids ();
+
+create trigger set_modified_datetime_utc_before_update BEFORE
+update on images for EACH row
+execute FUNCTION set_modified_datetime_utc ();
+
 create table public.captions (
   id uuid not null default gen_random_uuid (),
   created_datetime_utc timestamp with time zone not null default now(),
