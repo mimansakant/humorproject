@@ -80,7 +80,7 @@ export default async function Home() {
         className="text-center text-white/70 text-lg tracking-[0.3em] pt-4 pb-2"
         style={{ fontFamily: '"Courier New", Courier, monospace' }}
       >
-        CAPTIONS
+        SHAKE TO REVEAL PHOTO
       </h1>
 
       {error ? (
