@@ -65,7 +65,7 @@ function VoteOverlay({
         onClick={(e) => { e.stopPropagation(); handleVote(1) }}
         disabled={isPending}
         title={disabled ? 'Sign in to vote' : undefined}
-        className="text-xs leading-none transition-colors disabled:opacity-40"
+        className="text-xs leading-none transition-all hover:scale-125 hover:brightness-150 active:scale-90 disabled:opacity-40"
         style={{ color: userVote === 1 ? '#4ade80' : 'rgba(255,255,255,0.6)' }}
       >
         ▲
@@ -80,7 +80,7 @@ function VoteOverlay({
         onClick={(e) => { e.stopPropagation(); handleVote(-1) }}
         disabled={isPending}
         title={disabled ? 'Sign in to vote' : undefined}
-        className="text-xs leading-none transition-colors disabled:opacity-40"
+        className="text-xs leading-none transition-all hover:scale-125 hover:brightness-150 active:scale-90 disabled:opacity-40"
         style={{ color: userVote === -1 ? '#f87171' : 'rgba(255,255,255,0.6)' }}
       >
         ▼

@@ -29,7 +29,7 @@ export default function CaptionsPage({
         ) : (
           <a
             href="/login"
-            className="flex items-center gap-2 rounded-full px-4 py-2 transition-colors"
+            className="flex items-center gap-2 rounded-full px-4 py-2 transition-all hover:brightness-110 hover:scale-105 active:scale-95"
             style={{
               backgroundColor: 'rgba(255,255,255,0.08)',
               border: '1px solid rgba(255,255,255,0.18)',

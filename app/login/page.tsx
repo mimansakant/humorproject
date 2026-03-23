@@ -66,7 +66,7 @@ export default async function LoginPage({
         <form action={signInWithGoogle}>
           <button
             type="submit"
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 rounded-xl font-medium transition-colors bg-white text-gray-900 hover:bg-gray-100"
+            className="w-full flex items-center justify-center gap-3 px-6 py-3 rounded-xl font-medium transition-all bg-white text-gray-900 hover:bg-gray-100 hover:scale-[1.02] active:scale-95"
           >
             <GoogleIcon />
             Sign in with Google

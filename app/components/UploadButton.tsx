@@ -138,7 +138,7 @@ export default function UploadButton({
       {/* Upload pill button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 rounded-full px-4 py-2 transition-colors"
+        className="flex items-center gap-2 rounded-full px-4 py-2 transition-all hover:brightness-110 hover:scale-105 active:scale-95"
         style={{
           backgroundColor: 'rgba(255,255,255,0.08)',
           border: '1px solid rgba(255,255,255,0.18)',
@@ -215,7 +215,7 @@ export default function UploadButton({
                 <div className="flex gap-3 mt-6">
                   <button
                     onClick={handleClose}
-                    className="flex-1 py-2 rounded-xl text-xs"
+                    className="flex-1 py-2 rounded-xl text-xs transition-all hover:brightness-110 active:scale-95"
                     style={{
                       ...mono,
                       backgroundColor: 'rgba(255,255,255,0.05)',
@@ -228,7 +228,7 @@ export default function UploadButton({
                   <button
                     onClick={handleSubmit}
                     disabled={!file}
-                    className="flex-1 py-2 rounded-xl text-xs disabled:opacity-30"
+                    className="flex-1 py-2 rounded-xl text-xs disabled:opacity-30 transition-all hover:brightness-110 active:scale-95"
                     style={{
                       ...mono,
                       backgroundColor: 'rgba(255,255,255,0.1)',
