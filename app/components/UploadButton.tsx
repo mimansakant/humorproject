@@ -82,7 +82,7 @@ export default function UploadButton({
 
       // Step 3: Register image from CDN URL
       setStep(2)
-      const step3Body = { cdnUrl, isCommonUse: false }
+      const step3Body = { imageUrl: cdnUrl, isCommonUse: false }
       console.log('[step3] POST upload-image-from-url body:', step3Body)
       const uploadRes = await fetch(`${API_BASE}/upload-image-from-url`, {
         method: 'POST',
