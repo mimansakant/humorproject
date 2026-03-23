@@ -1,3 +1,20 @@
+create table public.caption_votes (
+  id bigint generated always as identity not null,
+  created_datetime_utc timestamp with time zone not null default now(),
+  modified_datetime_utc timestamp with time zone not null default now(),
+  vote_value smallint not null,
+  profile_id uuid not null,
+  caption_id uuid not null,
+  created_by_user_id uuid not null default auth.uid (),
+  modified_by_user_id uuid not null default auth.uid (),
+  constraint caption_votes_pkey primary key (id),
+  constraint caption_votes_caption_id_profile_id_key unique (caption_id, profile_id),
+  constraint caption_votes_caption_id_fkey foreign key (caption_id) references captions (id) on delete cascade,
+  constraint caption_votes_profile_id_fkey foreign key (profile_id) references profiles (id) on delete cascade,
+  constraint caption_votes_created_by_user_id_fkey foreign key (created_by_user_id) references profiles (id) on delete set null,
+  constraint caption_votes_modified_by_user_id_fkey foreign key (modified_by_user_id) references profiles (id) on delete set null
+) TABLESPACE pg_default;
+
 create table public.images (
   id uuid not null default gen_random_uuid (),
   created_datetime_utc timestamp with time zone not null default now(),

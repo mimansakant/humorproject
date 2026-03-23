@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { createAuthClient } from '@/lib/supabase-server'
 import PolaroidGrid from './components/PolaroidGrid'
 
 const BULB_COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#06b6d4']
@@ -54,19 +54,39 @@ function FairyLights() {
 }
 
 export default async function Home() {
+  const supabase = await createAuthClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  const profileId = user?.id ?? null
+
   const { data: raw, error } = await supabase
     .from('captions')
-    .select('id, content, created_datetime_utc, images(url)')
+    .select('id, content, created_datetime_utc, like_count, images(url)')
     .eq('is_public', true)
     .not('content', 'is', null)
     .order('created_datetime_utc', { ascending: false })
     .limit(50)
+
+  // Fetch the current user's votes for these captions
+  let voteMap = new Map<string, 1 | -1>()
+  if (profileId && raw && raw.length > 0) {
+    const { data: votes } = await supabase
+      .from('caption_votes')
+      .select('caption_id, vote_value')
+      .eq('profile_id', profileId)
+      .in('caption_id', raw.map((c) => c.id))
+    if (votes) {
+      voteMap = new Map(votes.map((v) => [v.caption_id, v.vote_value as 1 | -1]))
+    }
+  }
 
   const captions = (raw ?? []).map((row) => ({
     id: row.id,
     content: row.content,
     created_datetime_utc: row.created_datetime_utc,
     imageUrl: (row.images as unknown as { url: string | null } | null)?.url ?? null,
+    likeCount: (row.like_count as number) ?? 0,
+    userVote: voteMap.get(row.id) ?? null,
   }))
 
   return (
@@ -88,7 +108,7 @@ export default async function Home() {
           Error: {error.message}
         </p>
       ) : (
-        <PolaroidGrid captions={captions} />
+        <PolaroidGrid captions={captions} profileId={profileId} />
       )}
     </main>
   )
