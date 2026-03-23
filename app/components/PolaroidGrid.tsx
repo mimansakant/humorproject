@@ -2,18 +2,10 @@
 
 import { useState, useTransition } from 'react'
 import { castVote } from '@/app/actions/vote'
+import type { Caption } from '@/app/types'
 
 const TINTS = ['#7c3aed', '#0e7490', '#065f46', '#9d174d', '#92400e', '#1e3a5f']
 const ROTATIONS = [-3, -2, -1, 1, 2, 3]
-
-type Caption = {
-  id: string
-  content: string | null
-  created_datetime_utc: string
-  imageUrl: string | null
-  likeCount: number
-  userVote: 1 | -1 | null
-}
 
 function VoteOverlay({
   captionId,

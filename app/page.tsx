@@ -1,5 +1,5 @@
 import { createAuthClient } from '@/lib/supabase-server'
-import PolaroidGrid from './components/PolaroidGrid'
+import CaptionsPage from './components/CaptionsPage'
 
 const BULB_COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#06b6d4']
 const BULB_COUNT = 30
@@ -59,6 +59,9 @@ export default async function Home() {
   const { data: { user } } = await supabase.auth.getUser()
   const profileId = user?.id ?? null
 
+  const { data: { session } } = await supabase.auth.getSession()
+  const accessToken = session?.access_token ?? null
+
   const { data: raw, error } = await supabase
     .from('captions')
     .select('id, content, created_datetime_utc, like_count, images(url)')
@@ -108,7 +111,11 @@ export default async function Home() {
           Error: {error.message}
         </p>
       ) : (
-        <PolaroidGrid captions={captions} profileId={profileId} />
+        <CaptionsPage
+          initialCaptions={captions}
+          profileId={profileId}
+          accessToken={accessToken}
+        />
       )}
     </main>
   )
