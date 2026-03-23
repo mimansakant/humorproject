@@ -94,7 +94,7 @@ export default async function Home() {
 
   return (
     <main
-      className="min-h-screen"
+      className="min-h-screen pb-16"
       style={{ backgroundColor: '#111118' }}
     >
       <FairyLights />
@@ -110,6 +110,14 @@ export default async function Home() {
           accessToken={accessToken}
         />
       )}
+
+      {/* Fixed bottom fairy lights */}
+      <div
+        className="fixed bottom-0 left-0 right-0 z-20"
+        style={{ backgroundColor: '#111118' }}
+      >
+        <FairyLights />
+      </div>
     </main>
   )
 }
