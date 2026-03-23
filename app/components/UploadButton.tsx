@@ -49,44 +49,65 @@ export default function UploadButton({
     }
 
     try {
+      console.log('[upload] token (first 20 chars):', accessToken.slice(0, 20) + '...')
+      console.log('[upload] file name:', file.name, '| type:', file.type, '| size:', file.size)
+
       // Step 1: Generate presigned URL
       setStep(0)
+      const step1Body = { contentType: file.type }
+      console.log('[step1] POST generate-presigned-url body:', step1Body)
       const presignRes = await fetch(`${API_BASE}/generate-presigned-url`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ contentType: file.type }),
+        body: JSON.stringify(step1Body),
       })
-      if (!presignRes.ok) throw new Error(`Failed to get upload URL (${presignRes.status})`)
-      const { presignedUrl, cdnUrl } = await presignRes.json()
+      const presignText = await presignRes.text()
+      console.log('[step1] status:', presignRes.status, '| response:', presignText)
+      if (!presignRes.ok) throw new Error(`Failed to get upload URL (${presignRes.status}): ${presignText}`)
+      const { presignedUrl, cdnUrl } = JSON.parse(presignText)
+      console.log('[step1] presignedUrl:', presignedUrl)
+      console.log('[step1] cdnUrl:', cdnUrl)
 
       // Step 2: PUT image bytes directly to presigned URL
       setStep(1)
+      console.log('[step2] PUT to presignedUrl with Content-Type:', file.type, '| body: File object, size:', file.size)
       const putRes = await fetch(presignedUrl, {
         method: 'PUT',
         headers: { 'Content-Type': file.type },
         body: file,
       })
-      if (!putRes.ok) throw new Error(`Failed to upload image (${putRes.status})`)
+      const putText = await putRes.text()
+      console.log('[step2] status:', putRes.status, '| response:', putText)
+      if (!putRes.ok) throw new Error(`Failed to upload image (${putRes.status}): ${putText}`)
 
       // Step 3: Register image from CDN URL
       setStep(2)
+      const step3Body = { cdnUrl, isCommonUse: false }
+      console.log('[step3] POST upload-image-from-url body:', step3Body)
       const uploadRes = await fetch(`${API_BASE}/upload-image-from-url`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ cdnUrl, isCommonUse: false }),
+        body: JSON.stringify(step3Body),
       })
-      if (!uploadRes.ok) throw new Error(`Failed to process image (${uploadRes.status})`)
-      const { imageId } = await uploadRes.json()
+      const uploadText = await uploadRes.text()
+      console.log('[step3] status:', uploadRes.status, '| response:', uploadText)
+      if (!uploadRes.ok) throw new Error(`Failed to process image (${uploadRes.status}): ${uploadText}`)
+      const { imageId } = JSON.parse(uploadText)
+      console.log('[step3] imageId:', imageId)
 
       // Step 4: Generate captions
       setStep(3)
+      const step4Body = { imageId }
+      console.log('[step4] POST generate-captions body:', step4Body)
       const captionsRes = await fetch(`${API_BASE}/generate-captions`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ imageId }),
+        body: JSON.stringify(step4Body),
       })
-      if (!captionsRes.ok) throw new Error(`Failed to generate captions (${captionsRes.status})`)
-      const captionsData = await captionsRes.json()
+      const captionsText = await captionsRes.text()
+      console.log('[step4] status:', captionsRes.status, '| response:', captionsText)
+      if (!captionsRes.ok) throw new Error(`Failed to generate captions (${captionsRes.status}): ${captionsText}`)
+      const captionsData = JSON.parse(captionsText)
 
       const rawCaptions: { id: string; content?: string; created_datetime_utc?: string }[] =
         Array.isArray(captionsData) ? captionsData : (captionsData.captions ?? [])
@@ -104,6 +125,7 @@ export default function UploadButton({
       setIsOpen(false)
       onCaptionsGenerated(newCaptions)
     } catch (err) {
+      console.error('[upload] error:', err)
       setError(err instanceof Error ? err.message : 'Upload failed')
       setStep(null)
     }
