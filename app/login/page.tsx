@@ -66,10 +66,7 @@ export default async function LoginPage({
         <form action={signInWithGoogle}>
           <button
             type="submit"
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 rounded-xl font-medium transition-colors"
-            style={{ backgroundColor: '#ffffff', color: '#1f1f1f' }}
-            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f1f1f1')}
-            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#ffffff')}
+            className="w-full flex items-center justify-center gap-3 px-6 py-3 rounded-xl font-medium transition-colors bg-white text-gray-900 hover:bg-gray-100"
           >
             <GoogleIcon />
             Sign in with Google
