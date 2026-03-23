@@ -99,13 +99,6 @@ export default async function Home() {
     >
       <FairyLights />
 
-      <h1
-        className="text-center text-white/70 text-lg tracking-[0.3em] pt-4 pb-2"
-        style={{ fontFamily: '"Courier New", Courier, monospace' }}
-      >
-        SHAKE TO REVEAL PHOTO
-      </h1>
-
       {error ? (
         <p className="text-center text-red-400 font-mono text-sm mt-10">
           Error: {error.message}

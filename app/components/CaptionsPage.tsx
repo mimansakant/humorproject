@@ -22,9 +22,20 @@ export default function CaptionsPage({
 
   return (
     <>
-      {accessToken && (
-        <UploadButton accessToken={accessToken} onCaptionsGenerated={handleNewCaptions} />
-      )}
+      {/* Upload button — sits just below fairy lights */}
+      <div className="flex justify-center pt-3 pb-1">
+        {accessToken && (
+          <UploadButton accessToken={accessToken} onCaptionsGenerated={handleNewCaptions} />
+        )}
+      </div>
+
+      <h1
+        className="text-center text-white/70 text-lg tracking-[0.3em] pt-3 pb-2"
+        style={{ fontFamily: '"Courier New", Courier, monospace' }}
+      >
+        SHAKE TO REVEAL PHOTO
+      </h1>
+
       <PolaroidGrid captions={captions} profileId={profileId} />
     </>
   )

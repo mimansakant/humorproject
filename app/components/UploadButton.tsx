@@ -135,26 +135,24 @@ export default function UploadButton({
 
   return (
     <>
-      {/* Upload button — fixed top-right over fairy lights */}
+      {/* Upload pill button */}
       <button
         onClick={() => setIsOpen(true)}
-        title="Upload photo"
-        className="fixed z-20 flex items-center justify-center rounded-full transition-colors"
+        className="flex items-center gap-2 rounded-full px-4 py-2 transition-colors"
         style={{
-          top: '14px',
-          right: '16px',
-          width: '32px',
-          height: '32px',
-          backgroundColor: 'rgba(255,255,255,0.1)',
-          border: '1px solid rgba(255,255,255,0.15)',
+          backgroundColor: 'rgba(255,255,255,0.08)',
+          border: '1px solid rgba(255,255,255,0.18)',
           color: 'rgba(255,255,255,0.65)',
+          fontFamily: '"Courier New", Courier, monospace',
+          fontSize: '11px',
+          letterSpacing: '0.1em',
         }}
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="17 8 12 3 7 8" />
-          <line x1="12" y1="3" x2="12" y2="15" />
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+          <circle cx="12" cy="13" r="4" />
         </svg>
+        upload photo
       </button>
 
       {/* Modal backdrop */}
