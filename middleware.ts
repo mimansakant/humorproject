@@ -35,7 +35,12 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   }
 
-  // Redirect unauthenticated users to login
+  // Public routes — no auth required
+  if (pathname === '/') {
+    return supabaseResponse
+  }
+
+  // All other routes require authentication
   if (!user) {
     return NextResponse.redirect(new URL('/login', request.url))
   }

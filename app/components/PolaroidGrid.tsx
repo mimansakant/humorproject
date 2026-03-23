@@ -23,7 +23,11 @@ function VoteOverlay({
   const [isPending, startTransition] = useTransition()
 
   const handleVote = (value: 1 | -1) => {
-    if (disabled || isPending) return
+    if (isPending) return
+    if (disabled) {
+      window.location.href = '/login'
+      return
+    }
 
     const newVote: 1 | -1 | 0 = userVote === value ? 0 : value
     const prevVote = userVote
@@ -59,7 +63,7 @@ function VoteOverlay({
     >
       <button
         onClick={(e) => { e.stopPropagation(); handleVote(1) }}
-        disabled={disabled || isPending}
+        disabled={isPending}
         title={disabled ? 'Sign in to vote' : undefined}
         className="text-xs leading-none transition-colors disabled:opacity-40"
         style={{ color: userVote === 1 ? '#4ade80' : 'rgba(255,255,255,0.6)' }}
@@ -74,7 +78,7 @@ function VoteOverlay({
       </span>
       <button
         onClick={(e) => { e.stopPropagation(); handleVote(-1) }}
-        disabled={disabled || isPending}
+        disabled={isPending}
         title={disabled ? 'Sign in to vote' : undefined}
         className="text-xs leading-none transition-colors disabled:opacity-40"
         style={{ color: userVote === -1 ? '#f87171' : 'rgba(255,255,255,0.6)' }}
