@@ -20,13 +20,7 @@ async function signInWithGoogle() {
   if (data.url) redirect(data.url)
 }
 
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string }>
-}) {
-  const { error } = await searchParams
-
+export default async function LoginPage() {
   return (
     <main
       className="min-h-screen flex items-center justify-center"
@@ -49,21 +43,7 @@ export default async function LoginPage({
           sign in to continue
         </p>
 
-        {error === 'access_denied' && (
-          <div
-            className="mb-6 px-4 py-3 rounded-lg text-sm"
-            style={{
-              backgroundColor: 'rgba(127,29,29,0.3)',
-              border: '1px solid rgba(185,28,28,0.4)',
-              fontFamily: '"Courier New", Courier, monospace',
-              color: '#fca5a5',
-            }}
-          >
-            Access denied. Your account is not authorised.
-          </div>
-        )}
-
-        <form action={signInWithGoogle}>
+<form action={signInWithGoogle}>
           <button
             type="submit"
             className="w-full flex items-center justify-center gap-3 px-6 py-3 rounded-xl font-medium transition-all bg-white text-gray-900 hover:bg-gray-100 hover:scale-[1.02] active:scale-95"
