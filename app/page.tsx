@@ -1,6 +1,5 @@
 import { createAuthClient } from '@/lib/supabase-server'
 import CaptionsPage from './components/CaptionsPage'
-import BottomFairyLights from './components/BottomFairyLights'
 
 const BULB_COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#06b6d4']
 const BULB_COUNT = 30
@@ -95,7 +94,7 @@ export default async function Home() {
 
   return (
     <main
-      className="min-h-screen pb-16"
+      className="min-h-screen"
       style={{ backgroundColor: '#111118' }}
     >
       <FairyLights />
@@ -111,8 +110,6 @@ export default async function Home() {
           accessToken={accessToken}
         />
       )}
-
-      <BottomFairyLights />
     </main>
   )
 }
