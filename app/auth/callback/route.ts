@@ -1,6 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse, type NextRequest } from 'next/server'
+import { ALLOWED_EMAILS } from '@/lib/allowlist'
+
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
@@ -28,7 +30,15 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
 
     if (!error) {
-      return NextResponse.redirect(`${origin}/`)
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (user?.email && ALLOWED_EMAILS.includes(user.email)) {
+        return NextResponse.redirect(`${origin}/`)
+      }
+
+      // Email not in allowlist — sign out and deny access
+      await supabase.auth.signOut()
+      return NextResponse.redirect(`${origin}/login?error=access_denied`)
     }
   }
 
