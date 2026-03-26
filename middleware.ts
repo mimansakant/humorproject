@@ -23,16 +23,24 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
   const { pathname } = request.nextUrl
 
-  // Allow auth routes through
+  // Allow auth routes through before any network calls
   if (pathname.startsWith('/login') || pathname.startsWith('/auth')) {
-    // Redirect already-authenticated users away from login
-    if (pathname.startsWith('/login') && user) {
-      return NextResponse.redirect(new URL('/', request.url))
-    }
     return supabaseResponse
+  }
+
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch {
+    // If auth check fails, treat as unauthenticated
+  }
+
+  // Redirect already-authenticated users away from login
+  if (pathname.startsWith('/login') && user) {
+    return NextResponse.redirect(new URL('/', request.url))
   }
 
   // Public routes — no auth required
