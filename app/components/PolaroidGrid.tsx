@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useCallback, useEffect, useState, useTransition } from 'react'
 import { castVote } from '@/app/actions/vote'
 import type { Caption } from '@/app/types'
 
@@ -70,8 +70,13 @@ function VoteOverlay({
 
   return (
     <div
-      className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full px-2 py-1"
-      style={{ backgroundColor: 'rgba(0,0,0,0.65)', zIndex: 10 }}
+      className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full px-2.5 py-1.5 transition-all"
+      style={{
+        backgroundColor: userVote ? 'rgba(17,24,39,0.9)' : 'rgba(0,0,0,0.65)',
+        boxShadow: userVote ? `0 0 0 2px ${userVote === 1 ? 'rgba(74,222,128,0.8)' : 'rgba(248,113,113,0.8)'}` : undefined,
+        zIndex: 10,
+      }}
+      aria-label={userVote === 1 ? 'You upvoted this caption' : userVote === -1 ? 'You downvoted this caption' : 'Vote on this caption'}
     >
       <button
         onClick={(e) => { e.stopPropagation(); handleVote(1) }}
@@ -83,10 +88,10 @@ function VoteOverlay({
         ▲
       </button>
       <span
-        className="text-white text-[10px] min-w-[16px] text-center tabular-nums"
+        className="text-white text-xs font-bold min-w-[24px] text-center tabular-nums"
         style={{ fontFamily: '"Courier New", Courier, monospace' }}
       >
-        {voteCount}
+        {voteCount > 0 ? '+' : ''}{voteCount}
       </span>
       <button
         onClick={(e) => { e.stopPropagation(); handleVote(-1) }}
@@ -98,6 +103,17 @@ function VoteOverlay({
         ▼
       </button>
       <span className="sr-only" aria-live="polite">{status}</span>
+      {userVote && (
+        <span
+          className="absolute -top-5 right-0 rounded-full px-2 py-0.5 text-[9px] uppercase tracking-[0.12em] text-white"
+          style={{
+            backgroundColor: userVote === 1 ? 'rgba(22,101,52,0.95)' : 'rgba(159,18,57,0.95)',
+            fontFamily: '"Courier New", Courier, monospace',
+          }}
+        >
+          voted
+        </span>
+      )}
     </div>
   )
 }
@@ -122,10 +138,31 @@ function PolaroidCard({
   const [shaking, setShaking] = useState(false)
   const [revealed, setRevealed] = useState(false)
 
-  const handleClick = () => {
+  const revealPhoto = useCallback(() => {
     if (revealed || shaking) return
     setShaking(true)
-  }
+  }, [revealed, shaking])
+
+  useEffect(() => {
+    if (revealed) return
+
+    let lastShakeAt = 0
+    const threshold = 18
+    const handleMotion = (event: DeviceMotionEvent) => {
+      const acceleration = event.accelerationIncludingGravity
+      if (!acceleration) return
+
+      const totalForce = Math.abs(acceleration.x ?? 0) + Math.abs(acceleration.y ?? 0) + Math.abs(acceleration.z ?? 0)
+      const now = Date.now()
+      if (totalForce > threshold && now - lastShakeAt > 900) {
+        lastShakeAt = now
+        revealPhoto()
+      }
+    }
+
+    window.addEventListener('devicemotion', handleMotion)
+    return () => window.removeEventListener('devicemotion', handleMotion)
+  }, [revealed, revealPhoto])
 
   const handleAnimationEnd = () => {
     setShaking(false)
@@ -140,8 +177,8 @@ function PolaroidCard({
 
   return (
     <div
-      className={shaking ? 'polaroid-shake' : ''}
-      onClick={handleClick}
+      className={`group transition-transform duration-200 hover:-translate-y-2 focus-within:-translate-y-2 ${shaking ? 'polaroid-shake' : ''}`}
+      onClick={revealPhoto}
       onAnimationEnd={handleAnimationEnd}
       style={{
         '--rotation': `${rotation}deg`,
@@ -152,7 +189,7 @@ function PolaroidCard({
     >
       {/* Polaroid frame */}
       <div
-        className="bg-white"
+        className="bg-white transition-shadow duration-200 group-hover:shadow-[0_14px_34px_rgba(0,0,0,0.65)]"
         style={{
           width: '200px',
           padding: '12px 12px 0',
@@ -172,13 +209,25 @@ function PolaroidCard({
         >
           {/* Tint overlay — fades out on reveal */}
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 transition-opacity"
             style={{
               backgroundColor: tintColor,
               opacity: revealed ? 0.07 : 1,
               transition: 'opacity 1.3s ease',
             }}
           />
+
+          {!revealed && (
+            <div
+              className="absolute inset-x-4 top-1/2 -translate-y-1/2 rounded-full px-3 py-2 text-center text-[10px] uppercase tracking-[0.14em] text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
+              style={{
+                backgroundColor: 'rgba(0,0,0,0.55)',
+                fontFamily: '"Courier New", Courier, monospace',
+              }}
+            >
+              click or tap to reveal
+            </div>
+          )}
 
           {/* Vote overlay */}
           <VoteOverlay

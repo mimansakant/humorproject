@@ -1,11 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useSyncExternalStore } from 'react'
 import PolaroidGrid from './PolaroidGrid'
 import UploadButton from './UploadButton'
 import type { Caption } from '@/app/types'
 
 type SortMode = 'top' | 'newest'
+
+function subscribeToPointerChanges(onStoreChange: () => void) {
+  if (typeof window === 'undefined') return () => {}
+
+  const media = window.matchMedia('(pointer: coarse)')
+  media.addEventListener('change', onStoreChange)
+  return () => media.removeEventListener('change', onStoreChange)
+}
+
+function getCanShakeSnapshot() {
+  if (typeof window === 'undefined') return false
+  return 'DeviceMotionEvent' in window && window.matchMedia('(pointer: coarse)').matches
+}
 
 export default function CaptionsPage({
   initialCaptions,
@@ -18,6 +31,7 @@ export default function CaptionsPage({
 }) {
   const [captions, setCaptions] = useState<Caption[]>(initialCaptions)
   const [sortMode, setSortMode] = useState<SortMode>('top')
+  const canShake = useSyncExternalStore(subscribeToPointerChanges, getCanShakeSnapshot, () => false)
 
   const handleNewCaptions = (newCaptions: Caption[]) => {
     setCaptions((prev) => [...newCaptions, ...prev])
@@ -84,7 +98,7 @@ export default function CaptionsPage({
             className="mt-2 max-w-xl text-xs leading-5 text-white/45"
             style={{ fontFamily: '"Courier New", Courier, monospace' }}
           >
-            Vote with the arrows. Scores update instantly and Top ranked reorders by the crowd favorite.
+            Vote with the arrows. Scores update instantly, and Top ranked reorders by the crowd favorite. Cards marked voted are ones you have already rated.
           </p>
         </div>
 
@@ -130,7 +144,7 @@ export default function CaptionsPage({
         className="text-center text-white/55 text-sm tracking-[0.24em] pt-8 pb-2"
         style={{ fontFamily: '"Courier New", Courier, monospace' }}
       >
-        SHAKE TO REVEAL PHOTO
+        {canShake ? 'TAP OR SHAKE PHONE TO REVEAL PHOTO' : 'CLICK A POLAROID TO REVEAL PHOTO'}
       </h1>
 
       <PolaroidGrid
