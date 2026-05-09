@@ -5,6 +5,8 @@ import PolaroidGrid from './PolaroidGrid'
 import UploadButton from './UploadButton'
 import type { Caption } from '@/app/types'
 
+type SortMode = 'top' | 'newest'
+
 export default function CaptionsPage({
   initialCaptions,
   profileId,
@@ -15,10 +17,30 @@ export default function CaptionsPage({
   accessToken: string | null
 }) {
   const [captions, setCaptions] = useState<Caption[]>(initialCaptions)
+  const [sortMode, setSortMode] = useState<SortMode>('top')
 
   const handleNewCaptions = (newCaptions: Caption[]) => {
     setCaptions((prev) => [...newCaptions, ...prev])
   }
+
+  const handleVoteChange = (captionId: string, nextVote: 1 | -1 | null, nextCount: number) => {
+    setCaptions((prev) => prev.map((caption) => (
+      caption.id === captionId
+        ? { ...caption, likeCount: nextCount, userVote: nextVote }
+        : caption
+    )))
+  }
+
+  const sortedCaptions = [...captions].sort((a, b) => {
+    if (sortMode === 'newest') {
+      return new Date(b.created_datetime_utc).getTime() - new Date(a.created_datetime_utc).getTime()
+    }
+
+    if (b.likeCount !== a.likeCount) return b.likeCount - a.likeCount
+    return new Date(b.created_datetime_utc).getTime() - new Date(a.created_datetime_utc).getTime()
+  })
+
+  const topCaption = sortedCaptions[0]
 
   return (
     <>
@@ -50,14 +72,73 @@ export default function CaptionsPage({
         )}
       </div>
 
+      <section className="mx-auto flex max-w-3xl flex-col items-center gap-4 px-6 pt-4 text-center">
+        <div>
+          <h1
+            className="text-white/80 text-lg tracking-[0.3em]"
+            style={{ fontFamily: '"Courier New", Courier, monospace' }}
+          >
+            CAPTION RANKINGS
+          </h1>
+          <p
+            className="mt-2 max-w-xl text-xs leading-5 text-white/45"
+            style={{ fontFamily: '"Courier New", Courier, monospace' }}
+          >
+            Vote with the arrows. Scores update instantly and Top ranked reorders by the crowd favorite.
+          </p>
+        </div>
+
+        <div
+          className="inline-flex rounded-full p-1"
+          style={{
+            backgroundColor: 'rgba(255,255,255,0.08)',
+            border: '1px solid rgba(255,255,255,0.16)',
+          }}
+          aria-label="Caption sort"
+        >
+          {(['top', 'newest'] as SortMode[]).map((mode) => {
+            const active = sortMode === mode
+            return (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setSortMode(mode)}
+                className="rounded-full px-4 py-2 text-[11px] uppercase tracking-[0.16em] transition"
+                style={{
+                  backgroundColor: active ? 'rgba(255,255,255,0.18)' : 'transparent',
+                  color: active ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)',
+                  fontFamily: '"Courier New", Courier, monospace',
+                }}
+              >
+                {mode === 'top' ? 'Top ranked' : 'Newest'}
+              </button>
+            )
+          })}
+        </div>
+
+        {topCaption && sortMode === 'top' && (
+          <p
+            className="text-[11px] text-white/45"
+            style={{ fontFamily: '"Courier New", Courier, monospace' }}
+          >
+            Current leader: {topCaption.likeCount > 0 ? '+' : ''}{topCaption.likeCount} points
+          </p>
+        )}
+      </section>
+
       <h1
-        className="text-center text-white/70 text-lg tracking-[0.3em] pt-3 pb-2"
+        className="text-center text-white/55 text-sm tracking-[0.24em] pt-8 pb-2"
         style={{ fontFamily: '"Courier New", Courier, monospace' }}
       >
         SHAKE TO REVEAL PHOTO
       </h1>
 
-      <PolaroidGrid captions={captions} profileId={profileId} />
+      <PolaroidGrid
+        captions={sortedCaptions}
+        profileId={profileId}
+        sortMode={sortMode}
+        onVoteChange={handleVoteChange}
+      />
     </>
   )
 }

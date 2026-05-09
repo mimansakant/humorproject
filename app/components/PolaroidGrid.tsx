@@ -12,14 +12,17 @@ function VoteOverlay({
   initialCount,
   initialVote,
   disabled,
+  onVoteChange,
 }: {
   captionId: string
   initialCount: number
   initialVote: 1 | -1 | null
   disabled: boolean
+  onVoteChange: (captionId: string, nextVote: 1 | -1 | null, nextCount: number) => void
 }) {
   const [voteCount, setVoteCount] = useState(initialCount)
   const [userVote, setUserVote] = useState<1 | -1 | null>(initialVote)
+  const [status, setStatus] = useState('')
   const [isPending, startTransition] = useTransition()
 
   const handleVote = (value: 1 | -1) => {
@@ -32,18 +35,25 @@ function VoteOverlay({
     const newVote: 1 | -1 | 0 = userVote === value ? 0 : value
     const prevVote = userVote
     const prevCount = voteCount
+    let nextVote: 1 | -1 | null = null
+    let nextCount = voteCount
 
     // Optimistic update
     if (newVote === 0) {
-      setVoteCount((c) => c - (prevVote ?? 0))
-      setUserVote(null)
+      nextCount = voteCount - (prevVote ?? 0)
+      nextVote = null
     } else if (prevVote !== null) {
-      setVoteCount((c) => c + newVote * 2)
-      setUserVote(newVote)
+      nextCount = voteCount + newVote * 2
+      nextVote = newVote
     } else {
-      setVoteCount((c) => c + newVote)
-      setUserVote(newVote)
+      nextCount = voteCount + newVote
+      nextVote = newVote
     }
+
+    setVoteCount(nextCount)
+    setUserVote(nextVote)
+    onVoteChange(captionId, nextVote, nextCount)
+    setStatus(newVote === 0 ? 'Vote removed' : newVote === 1 ? 'Upvoted' : 'Downvoted')
 
     startTransition(async () => {
       try {
@@ -52,6 +62,8 @@ function VoteOverlay({
         // Revert on error
         setVoteCount(prevCount)
         setUserVote(prevVote)
+        onVoteChange(captionId, prevVote, prevCount)
+        setStatus('Vote failed')
       }
     })
   }
@@ -85,6 +97,7 @@ function VoteOverlay({
       >
         ▼
       </button>
+      <span className="sr-only" aria-live="polite">{status}</span>
     </div>
   )
 }
@@ -94,11 +107,17 @@ function PolaroidCard({
   tintColor,
   rotation,
   profileId,
+  rank,
+  sortMode,
+  onVoteChange,
 }: {
   caption: Caption
   tintColor: string
   rotation: number
   profileId: string | null
+  rank: number
+  sortMode: 'top' | 'newest'
+  onVoteChange: (captionId: string, nextVote: 1 | -1 | null, nextCount: number) => void
 }) {
   const [shaking, setShaking] = useState(false)
   const [revealed, setRevealed] = useState(false)
@@ -167,11 +186,21 @@ function PolaroidCard({
             initialCount={caption.likeCount}
             initialVote={caption.userVote}
             disabled={!profileId}
+            onVoteChange={onVoteChange}
           />
         </div>
 
         {/* White label area */}
         <div style={{ padding: '10px 4px 14px', minHeight: '76px' }}>
+          <div
+            className="mb-2 flex items-center justify-between gap-2 text-[9px] uppercase tracking-[0.14em]"
+            style={{ fontFamily: '"Courier New", Courier, monospace' }}
+          >
+            <span className="text-gray-500">{sortMode === 'top' ? `rank #${rank}` : 'new'}</span>
+            <span className={caption.likeCount >= 0 ? 'text-emerald-700' : 'text-rose-700'}>
+              {caption.likeCount > 0 ? '+' : ''}{caption.likeCount} pts
+            </span>
+          </div>
           <p
             className="text-xs leading-[1.55] line-clamp-3 text-gray-800"
             style={{ fontFamily: '"Courier New", Courier, monospace' }}
@@ -193,9 +222,13 @@ function PolaroidCard({
 export default function PolaroidGrid({
   captions,
   profileId,
+  sortMode,
+  onVoteChange,
 }: {
   captions: Caption[]
   profileId: string | null
+  sortMode: 'top' | 'newest'
+  onVoteChange: (captionId: string, nextVote: 1 | -1 | null, nextCount: number) => void
 }) {
   if (captions.length === 0) {
     return (
@@ -217,6 +250,9 @@ export default function PolaroidGrid({
           tintColor={TINTS[i % TINTS.length]}
           rotation={ROTATIONS[i % ROTATIONS.length]}
           profileId={profileId}
+          rank={i + 1}
+          sortMode={sortMode}
+          onVoteChange={onVoteChange}
         />
       ))}
     </div>

@@ -67,6 +67,7 @@ export default async function Home() {
     .select('id, content, created_datetime_utc, like_count, images(url)')
     .eq('is_public', true)
     .not('content', 'is', null)
+    .order('like_count', { ascending: false })
     .order('created_datetime_utc', { ascending: false })
     .limit(50)
 
